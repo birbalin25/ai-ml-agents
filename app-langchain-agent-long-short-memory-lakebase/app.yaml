@@ -16,7 +16,7 @@ env:
     valueFrom: "experiment"
   # Lakebase instance for short-term and long-term memory
   - name: LAKEBASE_INSTANCE_NAME
-    value: "bir-long-short-langchain"
+    value: "birlakebase"
   - name: EMBEDDING_ENDPOINT
     value: "databricks-gte-large-en"
   - name: EMBEDDING_DIMS

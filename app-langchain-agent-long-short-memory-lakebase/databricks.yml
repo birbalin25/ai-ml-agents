@@ -5,7 +5,7 @@ resources:
   # MLflow experiment for agent tracing - automatically created by bundle
   experiments:
     agent_langgraph_experiment:
-      name: /Users/${workspace.current_user.userName}/${bundle.name}-${bundle.target}
+      name: /Users/${workspace.current_user.userName}/bircreate/${bundle.name}-${bundle.target}
 
   apps:
     agent_langgraph:
@@ -23,20 +23,20 @@ resources:
         # Lakebase instance for short-term and long-term memory
         - name: 'database'
           database:
-            instance_name: 'bir-long-short-langchain'
+            instance_name: 'birlakebase'
             database_name: 'postgres'
             permission: 'CAN_CONNECT_AND_CREATE'
 
         # Knowledge Assistant endpoint for UC upgrade / HMS federation
         - name: 'ka_endpoint'
           serving_endpoint:
-            name: 'ka-3c7731c6-endpoint'
+            name: 'ka-7ad4f1f5-endpoint'
             permission: 'CAN_QUERY'
 
         # UC function: get_weather
         - name: 'get_weather_function'
           uc_securable:
-            securable_full_name: 'serverless_bir_catalog.birschema.get_weather'
+            securable_full_name: 'bircatalog.agent.get_weather'
             securable_type: 'FUNCTION'
             permission: 'EXECUTE'
 
@@ -50,9 +50,9 @@ targets:
   prod:
     mode: production
     workspace:
-      host: https://fevm-serverless-bir.cloud.databricks.com
-      root_path: /Workspace/bir_app_root_ls_mem/${bundle.name}/${bundle.target}
+      host: https://adb-984752964297111.11.azuredatabricks.net
+      root_path: /Workspace/bir_app_root_ls_mem/bircreate2/${bundle.name}/${bundle.target}
     resources:
       apps:
         agent_langgraph:
-          name: agent-langgraph-all-mem-app
+          name: agent-langgraph-all-mem-app2

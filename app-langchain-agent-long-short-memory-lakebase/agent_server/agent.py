@@ -34,14 +34,14 @@ sp_workspace_client = WorkspaceClient()
 
 # Lakebase configuration for memory
 LAKEBASE_INSTANCE_NAME = resolve_lakebase_instance_name(
-    os.environ.get("LAKEBASE_INSTANCE_NAME", "bir-long-short-langchain"),
+    os.environ.get("LAKEBASE_INSTANCE_NAME", "birlakebase"),
     sp_workspace_client,
 )
 EMBEDDING_ENDPOINT = os.environ.get("EMBEDDING_ENDPOINT", "databricks-gte-large-en")
 EMBEDDING_DIMS = int(os.environ.get("EMBEDDING_DIMS", "1024"))
 
 LLM_ENDPOINT_NAME = "databricks-gpt-5-2"
-UC_UPGRADE_ENDPOINT = "ka-3c7731c6-endpoint"
+UC_UPGRADE_ENDPOINT = "ka-7ad4f1f5-endpoint"
 SYSTEM_PROMPT = (
     "You are a helpful assistant. Use available tools to answer questions. "
     "You have the following tools:\n"
@@ -87,7 +87,7 @@ def init_mcp_client(workspace_client: WorkspaceClient) -> DatabricksMultiServerM
             ),
             DatabricksMCPServer(
                 name="get-weather",
-                url=f"{host_name}/api/2.0/mcp/functions/serverless_bir_catalog/birschema/get_weather",
+                url=f"{host_name}/api/2.0/mcp/functions/bircatalog/agent/get_weather",
                 workspace_client=workspace_client,
             ),
         ]
@@ -149,6 +149,7 @@ async def streaming(
             embedding_endpoint=EMBEDDING_ENDPOINT,
             embedding_dims=EMBEDDING_DIMS,
         ) as store:
+            await checkpointer.setup()
             await store.setup()
 
             agent = create_react_agent(
