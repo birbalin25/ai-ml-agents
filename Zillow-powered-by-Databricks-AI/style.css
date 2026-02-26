@@ -1,0 +1,352 @@
+/* Zillow Re-imagined — Zillow-inspired Theme */
+
+:root {
+    --zillow-blue: #006AFF;
+    --zillow-dark: #2A2A33;
+    --zillow-gray: #586069;
+    --zillow-light: #F7F7F7;
+    --zillow-green: #24B47E;
+    --zillow-red: #E4002B;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --card-hover-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Hide Streamlit defaults */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* App background */
+.stApp {
+    background-color: var(--zillow-light);
+}
+
+/* Hero search section */
+.hero-section {
+    background: linear-gradient(135deg, var(--zillow-blue), #004bb5);
+    padding: 2.5rem 2rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.hero-section h1 {
+    color: white;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.hero-section p {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 1.1rem;
+}
+
+/* Property cards */
+.property-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    margin-bottom: 1rem;
+}
+
+.property-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--card-hover-shadow);
+}
+
+.property-card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.property-card .card-body {
+    padding: 1rem;
+}
+
+.property-card .price {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--zillow-dark);
+    margin: 0;
+}
+
+.property-card .details {
+    color: var(--zillow-gray);
+    font-size: 0.9rem;
+    margin: 0.3rem 0;
+}
+
+.property-card .address {
+    color: var(--zillow-gray);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+/* Zestimate badge */
+.zestimate-badge {
+    display: inline-block;
+    background: var(--zillow-green);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 0.5rem;
+}
+
+/* Status badge */
+.status-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
+.status-for-sale { background: var(--zillow-blue); color: white; }
+.status-pending { background: #FF9800; color: white; }
+.status-recently-sold { background: var(--zillow-red); color: white; }
+
+/* Feature tags */
+.feature-tag {
+    display: inline-block;
+    background: #E8F0FE;
+    color: var(--zillow-blue);
+    font-size: 0.75rem;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin: 2px 2px;
+}
+
+/* Chat bubbles */
+.chat-user {
+    background: var(--zillow-blue);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: 18px 18px 4px 18px;
+    margin: 0.5rem 0;
+    max-width: 80%;
+    margin-left: auto;
+}
+
+.chat-assistant {
+    background: white;
+    color: var(--zillow-dark);
+    padding: 0.75rem 1rem;
+    border-radius: 18px 18px 18px 4px;
+    margin: 0.5rem 0;
+    max-width: 80%;
+    box-shadow: var(--card-shadow);
+}
+
+/* Metric cards */
+.metric-card {
+    background: white;
+    border-radius: 10px;
+    padding: 1.2rem;
+    box-shadow: var(--card-shadow);
+    text-align: center;
+}
+
+.metric-card .metric-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--zillow-blue);
+}
+
+.metric-card .metric-label {
+    font-size: 0.85rem;
+    color: var(--zillow-gray);
+}
+
+/* Sidebar styling */
+section[data-testid="stSidebar"] {
+    background-color: #FAFBFD;
+    border-right: 1px solid #E0E0E0;
+}
+
+section[data-testid="stSidebar"] .stSelectbox label,
+section[data-testid="stSidebar"] .stSlider label,
+section[data-testid="stSidebar"] .stNumberInput label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--zillow-dark) !important;
+    margin-bottom: 2px;
+}
+
+/* Sidebar selectbox / dropdown */
+section[data-testid="stSidebar"] [data-baseweb="select"] {
+    background-color: white !important;
+    border: 1px solid #D0D5DD !important;
+    border-radius: 8px !important;
+}
+
+section[data-testid="stSidebar"] [data-baseweb="select"] div {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+}
+
+section[data-testid="stSidebar"] [data-baseweb="select"] input {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+}
+
+/* Sidebar slider */
+section[data-testid="stSidebar"] [data-testid="stSlider"] [data-baseweb="slider"] div {
+    color: var(--zillow-dark) !important;
+}
+
+section[data-testid="stSidebar"] .stSlider [data-testid="stThumbValue"] {
+    color: var(--zillow-dark) !important;
+}
+
+/* All dropdown menus and select boxes globally */
+[data-baseweb="select"],
+[data-baseweb="select"] div {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+    border-color: #D0D5DD !important;
+}
+
+[data-baseweb="select"] input {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+    caret-color: var(--zillow-dark) !important;
+}
+
+[data-baseweb="popover"],
+[data-baseweb="popover"] ul,
+[data-baseweb="popover"] li,
+[data-baseweb="menu"],
+[data-baseweb="menu"] li {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+}
+
+[data-baseweb="popover"] li:hover,
+[data-baseweb="menu"] li:hover {
+    background-color: #F0F4FF !important;
+}
+
+/* Selectbox label */
+.stSelectbox label {
+    color: var(--zillow-dark) !important;
+    font-weight: 600;
+}
+
+/* Sidebar general text */
+section[data-testid="stSidebar"] p,
+section[data-testid="stSidebar"] span,
+section[data-testid="stSidebar"] div {
+    color: var(--zillow-dark);
+}
+
+/* Tab styling */
+.stTabs [data-baseweb="tab"] {
+    font-weight: 600;
+    color: var(--zillow-gray);
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--zillow-blue);
+    border-bottom-color: var(--zillow-blue);
+}
+
+/* ── Force dark text everywhere to prevent invisible text ── */
+
+/* Global text color */
+.stApp, .stApp p, .stApp span, .stApp li, .stApp div {
+    color: var(--zillow-dark);
+}
+
+/* Chat messages — user and assistant */
+[data-testid="stChatMessage"] p,
+[data-testid="stChatMessage"] span,
+[data-testid="stChatMessage"] li,
+[data-testid="stChatMessage"] div,
+[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] p,
+[data-testid="stChatMessage"] [data-testid="stMarkdownContainer"] {
+    color: var(--zillow-dark) !important;
+}
+
+/* Chat input */
+[data-testid="stChatInput"] textarea {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+}
+
+/* Search input */
+.stTextInput input {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+}
+
+/* All input fields */
+input, textarea, select {
+    color: var(--zillow-dark) !important;
+    background-color: white !important;
+    caret-color: var(--zillow-dark) !important;
+}
+
+/* Alert boxes */
+.stAlert [data-testid="stMarkdownContainer"] p,
+.stAlert [data-testid="stMarkdownContainer"],
+div[data-testid="stNotification"] p,
+div[data-testid="stNotification"] {
+    color: #1a1a1a !important;
+}
+
+.stAlert pre, .stAlert code {
+    color: #1a1a1a !important;
+}
+
+/* Expander text */
+[data-testid="stExpander"] p,
+[data-testid="stExpander"] span,
+[data-testid="stExpander"] li {
+    color: var(--zillow-dark) !important;
+}
+
+/* Markdown containers */
+[data-testid="stMarkdownContainer"] p,
+[data-testid="stMarkdownContainer"] li,
+[data-testid="stMarkdownContainer"] h1,
+[data-testid="stMarkdownContainer"] h2,
+[data-testid="stMarkdownContainer"] h3,
+[data-testid="stMarkdownContainer"] h4 {
+    color: var(--zillow-dark) !important;
+}
+
+/* Tab content text */
+.stTabs [data-testid="stMarkdownContainer"] p {
+    color: var(--zillow-dark) !important;
+}
+
+/* Captions */
+[data-testid="stCaptionContainer"] p {
+    color: var(--zillow-gray) !important;
+}
+
+/* Metric values and labels */
+[data-testid="stMetric"] label,
+[data-testid="stMetric"] [data-testid="stMetricValue"],
+[data-testid="stMetric"] [data-testid="stMetricLabel"] {
+    color: var(--zillow-dark) !important;
+}
+
+/* Streamlit button overrides */
+.stButton > button {
+    background-color: var(--zillow-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    padding: 0.5rem 1.5rem;
+}
+
+.stButton > button:hover {
+    background-color: #004bb5;
+}
