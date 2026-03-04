@@ -1,0 +1,23 @@
+[project]
+name = "support-portal"
+version = "1.0.0"
+description = "Support Triage Portal - Databricks App with Lakebase backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.34.0",
+    "asyncpg>=0.30.0",
+    "databricks-sdk>=0.40.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+start-app = "scripts.start_app:main"
+init-db = "scripts.init_db:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend", "scripts"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

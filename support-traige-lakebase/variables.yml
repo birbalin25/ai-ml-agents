@@ -1,0 +1,34 @@
+variables:
+  app_name:
+    description: "Databricks App name"
+    default: "support-portal"
+  app_description:
+    description: "App description"
+    default: "Support Triage Portal - Track and manage support tickets"
+  lakebase_project:
+    description: "Lakebase project name"
+    default: "support-lakebase"
+  lakebase_branch:
+    description: "Lakebase branch"
+    default: "production"
+  lakebase_endpoint:
+    description: "Lakebase endpoint"
+    default: "primary"
+  lakebase_database:
+    description: "Logical database name for app queries"
+    default: "support_portal"
+  lakebase_host:
+    description: "Public Lakebase endpoint host"
+    default: "ep-flat-truth-d21f2ehk.database.us-east-1.cloud.databricks.com"
+  lakebase_instance_name:
+    description: "Lakebase instance for resource binding"
+    default: "support-lakebase"
+  lakebase_bound_database:
+    description: "Database name in resource binding (must be postgres)"
+    default: "postgres"
+  lakebase_permission:
+    description: "Lakebase resource binding permission level"
+    default: "CAN_CONNECT_AND_CREATE"
+  app_manage_user:
+    description: "User with CAN_MANAGE permission on the app"
+    default: "birbal.das@databricks.com"

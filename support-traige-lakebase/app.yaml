@@ -1,0 +1,18 @@
+command:
+  - uv
+  - run
+  - start-app
+
+env:
+  - name: LAKEBASE_PROJECT
+    value: support-lakebase
+  - name: LAKEBASE_BRANCH
+    value: production
+  - name: LAKEBASE_ENDPOINT
+    value: primary
+  - name: LAKEBASE_DATABASE
+    value: support_portal
+  - name: LAKEBASE_HOST
+    value: ""
+  - name: LAKEBASE_INSTANCE_NAME
+    value: bir-support-lakebase
