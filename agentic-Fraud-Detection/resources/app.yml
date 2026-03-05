@@ -1,0 +1,25 @@
+resources:
+  apps:
+    live_fraud_queue:
+      name: ${var.app_name}
+      source_code_path: ../app
+      config:
+        command:
+          - uvicorn
+          - app:app
+          - --host
+          - "0.0.0.0"
+          - --port
+          - "8000"
+        env:
+          - name: LAKEBASE_HOST
+            value: ${var.lakebase_host}
+          - name: LAKEBASE_DB
+            value: ${var.lakebase_db}
+          - name: LAKEBASE_INSTANCE
+            value: ${var.lakebase_instance}
+      resources:
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE

@@ -1,0 +1,14 @@
+resources:
+  pipelines:
+    fraud_triage_dlt_pipeline:
+      name: ${var.dlt_pipeline_name}
+      catalog: ${var.catalog}
+      target: fraud_detection
+      serverless: true
+      continuous: false
+      channel: CURRENT
+      libraries:
+        - notebook:
+            path: ../notebooks/01_dlt_fraud_pipeline.py
+      configuration:
+        pipelines.enableTrackHistory: "true"

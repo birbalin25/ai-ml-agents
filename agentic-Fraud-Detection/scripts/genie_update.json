@@ -1,0 +1,6 @@
+{
+  "warehouse_id": "8620a950b7475da4",
+  "title": "Fraud Triage Investigator",
+  "description": "Conversational investigation space for fraud analysts. Ask questions about transactions, login patterns, risk scores, and fraud KPIs using natural language.",
+  "serialized_space": "{\"version\":2,\"data_sources\":{\"tables\":[{\"name\":\"serverless_stable_p2uvy4_catalog.fraud_detection.silver_enriched_transactions\"},{\"name\":\"serverless_stable_p2uvy4_catalog.fraud_operations.gold_fraud_kpis\"},{\"name\":\"serverless_stable_p2uvy4_catalog.fraud_operations.real_time_fraud_triage\"},{\"name\":\"serverless_stable_p2uvy4_catalog.fraud_operations.gold_account_takeover\"},{\"name\":\"serverless_stable_p2uvy4_catalog.fraud_operations.gold_fraud_by_pattern\"},{\"name\":\"serverless_stable_p2uvy4_catalog.fraud_detection.silver_velocity_anomalies\"},{\"name\":\"serverless_stable_p2uvy4_catalog.fraud_detection.user_profiles\"}]}}"
+}

@@ -1,0 +1,34 @@
+variables:
+  catalog:
+    description: Unity Catalog name
+    default: serverless_bir_catalog
+  warehouse_id:
+    description: SQL Warehouse ID
+    default: "19be9738b181575a"
+  lakebase_host:
+    description: Lakebase Postgres host
+    default: "instance-2af707c9-c7d7-4bc9-91b0-632db640ccb4.database.cloud.databricks.com"
+  lakebase_db:
+    description: Lakebase database name
+    default: fraud_ops
+  lakebase_instance:
+    description: Lakebase instance name for credential generation
+    default: fraud-triage-ops
+  lakebase_user:
+    description: Postgres user for Lakebase
+    default: "birbal.das@databricks.com"
+  service_principal_id:
+    description: App service principal application ID for permissions
+    default: "32fc6cfe-33be-41f9-885a-adaa4bd63616"
+  job_schedule_status:
+    description: Workflow schedule pause status (PAUSED or UNPAUSED)
+    default: PAUSED
+  dlt_pipeline_name:
+    description: DLT pipeline display name
+    default: "[DEV] Fraud Triage - DLT Pipeline"
+  job_name:
+    description: Workflow job display name
+    default: "[DEV] Fraud Triage - Pipeline + Sync"
+  app_name:
+    description: Databricks App name
+    default: live-fraud-queue-dev

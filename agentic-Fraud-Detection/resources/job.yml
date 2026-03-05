@@ -1,0 +1,50 @@
+resources:
+  jobs:
+    fraud_triage_workflow:
+      name: ${var.job_name}
+      max_concurrent_runs: 1
+      tags:
+        project: fraud-triage-agent
+      schedule:
+        quartz_cron_expression: "0 0 */4 * * ?"
+        timezone_id: UTC
+        pause_status: ${var.job_schedule_status}
+      tasks:
+        - task_key: run_dlt_pipeline
+          description: "Run the DLT fraud detection pipeline (Bronze -> Silver -> Gold -> Triage)"
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.fraud_triage_dlt_pipeline.id}
+            full_refresh: false
+          timeout_seconds: 1800
+
+        - task_key: sync_to_lakebase
+          description: "Sync DLT triage Delta table to Lakebase Postgres (ON CONFLICT DO NOTHING)"
+          depends_on:
+            - task_key: run_dlt_pipeline
+          notebook_task:
+            notebook_path: ../notebooks/06_lakebase_sync.py
+            base_parameters:
+              catalog: ${var.catalog}
+            source: WORKSPACE
+          environment_key: Default
+          timeout_seconds: 900
+
+        - task_key: sync_decisions_to_delta
+          description: "Reverse sync analyst decisions from Lakebase back to Delta for Genie Space"
+          depends_on:
+            - task_key: sync_to_lakebase
+          notebook_task:
+            notebook_path: ../notebooks/07_sync_decisions_to_delta.py
+            base_parameters:
+              catalog: ${var.catalog}
+            source: WORKSPACE
+          environment_key: Default
+          timeout_seconds: 900
+
+      environments:
+        - environment_key: Default
+          spec:
+            client: "1"
+            dependencies:
+              - psycopg2-binary
+              - databricks-sdk

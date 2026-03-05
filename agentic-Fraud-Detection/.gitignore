@@ -1,0 +1,11 @@
+# Large data files — regenerate with: python scripts/generate_mock_data.py
+data/transactions.csv
+data/login_logs.csv
+
+# Databricks bundle state
+.databricks/
+
+# Python
+__pycache__/
+*.pyc
+.venv/

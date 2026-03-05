@@ -1,0 +1,34 @@
+bundle:
+  name: fraud-triage-agent
+
+include:
+  - variables.yml
+  - resources/*.yml
+
+sync:
+  include:
+    - notebooks/**
+    - app/**
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      profile: vm
+    variables:
+      dlt_pipeline_name: "[DEV] Fraud Triage - DLT Pipeline"
+      job_name: "[DEV] Fraud Triage - Pipeline + Sync"
+      app_name: live-fraud-queue-dev
+      job_schedule_status: PAUSED
+
+  prod:
+    mode: production
+    workspace:
+      profile: vm
+      root_path: /Workspace/Users/birbal.das@databricks.com/.bundle/${bundle.name}/${bundle.target}
+    variables:
+      dlt_pipeline_name: "Fraud Triage - DLT Pipeline"
+      job_name: "Fraud Triage - Pipeline + Sync"
+      app_name: live-fraud-queue
+      job_schedule_status: UNPAUSED
