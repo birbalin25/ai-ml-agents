@@ -1,0 +1,36 @@
+variables:
+  # --- Unity Catalog ---
+  catalog:
+    description: "Unity Catalog name for materialized views"
+    default: "bircatalog"
+
+  schema:
+    description: "Schema name for materialized views and synced tables"
+    default: "admin"
+
+  # --- Lakebase Instance ---
+  lakebase_instance:
+    description: "Lakebase provisioned instance name"
+
+  lakebase_capacity:
+    description: "Lakebase provisioned capacity (CU_1, CU_2, CU_4, CU_8)"
+    default: "CU_1"
+
+  lakebase_host:
+    description: "Lakebase PostgreSQL host"
+
+  lakebase_port:
+    description: "Lakebase PostgreSQL port"
+    default: "5432"
+
+  lakebase_database:
+    description: "Lakebase database name"
+    default: "databricks_postgres"
+
+  lakebase_user:
+    description: "Lakebase user (app service principal client ID)"
+
+  # --- App Settings ---
+  query_cache_ttl_seconds:
+    description: "Cache TTL for SQL query results in seconds"
+    default: "300"

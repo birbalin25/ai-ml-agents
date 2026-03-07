@@ -1,0 +1,123 @@
+bundle:
+  name: admin-observability
+
+include:
+  - variables.yml
+
+resources:
+  apps:
+    admin_observability:
+      name: "admin-observability-${bundle.target}"
+      description: "Databricks Platform Insights — monitors compute usage, cost drivers, performance, and user behavior across all workspaces."
+      source_code_path: ./src
+
+      config:
+        command:
+          - streamlit
+          - run
+          - streamlit_app.py
+
+        env:
+          - name: APP_ENVIRONMENT
+            value: ${bundle.target}
+          - name: QUERY_CACHE_TTL_SECONDS
+            value: ${var.query_cache_ttl_seconds}
+          - name: LAKEBASE_HOST
+            value: ${var.lakebase_host}
+          - name: LAKEBASE_PORT
+            value: ${var.lakebase_port}
+          - name: LAKEBASE_DATABASE
+            value: ${var.lakebase_database}
+          - name: LAKEBASE_USER
+            value: ${var.lakebase_user}
+
+  pipelines:
+    mv_pipeline:
+      name: "admin-observability-mvs-${bundle.target}"
+      catalog: ${var.catalog}
+      target: ${var.schema}
+      serverless: true
+      channel: "CURRENT"
+      libraries:
+        - notebook:
+            path: ./notebooks/define_mvs.py
+
+  jobs:
+    mv_refresh_job:
+      name: "admin-observability-mv-refresh-${bundle.target}"
+      schedule:
+        quartz_cron_expression: "0 0 */4 * * ?"
+        timezone_id: "UTC"
+      tasks:
+        # Task 1: Refresh all 11 Materialized Views (DLT pipeline)
+        - task_key: refresh_mvs
+          pipeline_task:
+            pipeline_id: ${resources.pipelines.mv_pipeline.id}
+
+        # Task 2: Ensure Lakebase instance exists and is ACTIVE (runs in parallel with Task 1)
+        - task_key: setup_lakebase_instance
+          environment_key: default
+          notebook_task:
+            notebook_path: ./notebooks/setup_lakebase_instance.py
+            base_parameters:
+              lakebase_instance: ${var.lakebase_instance}
+              lakebase_database: ${var.lakebase_database}
+              lakebase_capacity: ${var.lakebase_capacity}
+
+        # Task 3: Create/verify synced tables (depends on Tasks 1 + 2)
+        - task_key: sync_to_lakebase
+          depends_on:
+            - task_key: refresh_mvs
+            - task_key: setup_lakebase_instance
+          environment_key: default
+          notebook_task:
+            notebook_path: ./notebooks/sync_to_lakebase.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              lakebase_instance: ${var.lakebase_instance}
+              lakebase_database: ${var.lakebase_database}
+
+        # Task 4: Grant Lakebase access to the App service principal (depends on Task 3)
+        - task_key: grant_lakebase_access
+          depends_on:
+            - task_key: sync_to_lakebase
+          environment_key: default
+          notebook_task:
+            notebook_path: ./notebooks/grant_lakebase_access.py
+            base_parameters:
+              app_name: "admin-observability-${bundle.target}"
+              lakebase_instance: ${var.lakebase_instance}
+              lakebase_database: ${var.lakebase_database}
+              schema: ${var.schema}
+
+      environments:
+        - environment_key: default
+          spec:
+            client: "1"
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://<dev-workspace>.cloud.databricks.com
+
+    variables:
+      lakebase_instance: "<dev-lakebase-instance>"
+      lakebase_host: "<dev-lakebase-host>"
+      lakebase_user: "<dev-lakebase-user>"
+      query_cache_ttl_seconds: "120"
+
+  prod:
+    mode: production
+    run_as:
+      user_name: birbal.das@databricks.com
+    workspace:
+      host: https://e2-demo-field-eng.cloud.databricks.com
+
+    variables:
+      lakebase_instance: "bir-lakebase-fraud-detection"
+      lakebase_host: "instance-9278b37e-e9ea-452a-8b18-ba7c58bc919c.database.cloud.databricks.com"
+      lakebase_user: "9d3176ae-0089-4471-a4bb-624b78e4c73f"
+      query_cache_ttl_seconds: "600"
