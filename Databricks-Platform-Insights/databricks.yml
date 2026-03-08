@@ -28,8 +28,6 @@ resources:
             value: ${var.lakebase_port}
           - name: LAKEBASE_DATABASE
             value: ${var.lakebase_database}
-          - name: LAKEBASE_USER
-            value: ${var.lakebase_user}
 
   pipelines:
     mv_pipeline:
@@ -106,7 +104,6 @@ targets:
     variables:
       lakebase_instance: "<dev-lakebase-instance>"
       lakebase_host: "<dev-lakebase-host>"
-      lakebase_user: "<dev-lakebase-user>"
       query_cache_ttl_seconds: "120"
 
   prod:
@@ -119,5 +116,4 @@ targets:
     variables:
       lakebase_instance: "bir-lakebase-fraud-detection"
       lakebase_host: "instance-9278b37e-e9ea-452a-8b18-ba7c58bc919c.database.cloud.databricks.com"
-      lakebase_user: "9d3176ae-0089-4471-a4bb-624b78e4c73f"
       query_cache_ttl_seconds: "600"

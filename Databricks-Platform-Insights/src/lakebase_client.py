@@ -16,7 +16,6 @@ from config import (
     LAKEBASE_HOST,
     LAKEBASE_PORT,
     LAKEBASE_DATABASE,
-    LAKEBASE_USER,
     QUERY_CACHE_TTL,
 )
 
@@ -26,6 +25,16 @@ logger = logging.getLogger(__name__)
 @st.cache_resource
 def _get_workspace_client() -> WorkspaceClient:
     return WorkspaceClient()
+
+
+@st.cache_resource
+def _get_lakebase_user() -> str:
+    """Discover the app's service principal client ID for use as PG username."""
+    w = _get_workspace_client()
+    me = w.current_user.me()
+    user = me.user_name
+    logger.info(f"Resolved Lakebase user: {user}")
+    return user
 
 
 def _get_lakebase_token() -> str:
@@ -44,7 +53,7 @@ def _get_connection():
         host=LAKEBASE_HOST,
         port=LAKEBASE_PORT,
         database=LAKEBASE_DATABASE,
-        user=LAKEBASE_USER,
+        user=_get_lakebase_user(),
         password=_get_lakebase_token(),
         sslmode="require",
     )

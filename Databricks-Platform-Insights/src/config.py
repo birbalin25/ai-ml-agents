@@ -18,7 +18,6 @@ APP_ENVIRONMENT = os.environ.get("APP_ENVIRONMENT", "dev")
 LAKEBASE_HOST = os.environ.get("LAKEBASE_HOST")
 LAKEBASE_PORT = int(os.environ.get("LAKEBASE_PORT", "5432"))
 LAKEBASE_DATABASE = os.environ.get("LAKEBASE_DATABASE", "databricks_postgres")
-LAKEBASE_USER = os.environ.get("LAKEBASE_USER")
 
 # ---------------------------------------------------------------------------
 # Lakebase Schema (where synced MV tables land)

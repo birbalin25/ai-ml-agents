@@ -27,9 +27,6 @@ variables:
     description: "Lakebase database name"
     default: "databricks_postgres"
 
-  lakebase_user:
-    description: "Lakebase user (app service principal client ID)"
-
   # --- App Settings ---
   query_cache_ttl_seconds:
     description: "Cache TTL for SQL query results in seconds"

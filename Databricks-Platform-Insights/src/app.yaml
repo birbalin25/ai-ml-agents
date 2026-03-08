@@ -19,6 +19,3 @@ env:
   - name: LAKEBASE_DATABASE
     description: "Lakebase database name"
     value: "databricks_postgres"
-  - name: LAKEBASE_USER
-    description: "Lakebase user (app service principal)"
-    value: "9d3176ae-0089-4471-a4bb-624b78e4c73f"

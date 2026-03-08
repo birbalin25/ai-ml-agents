@@ -6,7 +6,7 @@
 # MAGIC Each `@dlt.table()` with a batch source creates a **Materialized View**
 # MAGIC in the pipeline's target catalog/schema (`bircatalog.admin`).
 # MAGIC
-# MAGIC **60-day rolling window** on all views.
+# MAGIC **180-day rolling window** on all views.
 
 # COMMAND ----------
 
@@ -22,7 +22,7 @@ import dlt
 
 @dlt.table(
     name="mv_billing_daily_by_sku",
-    comment="Billing pre-aggregated by date, workspace, SKU with category classifications (60-day window)",
+    comment="Billing pre-aggregated by date, workspace, SKU with category classifications (180-day window)",
 )
 def mv_billing_daily_by_sku():
     return spark.sql("""
@@ -66,7 +66,7 @@ def mv_billing_daily_by_sku():
             AND u.cloud = p.cloud
             AND u.usage_date >= COALESCE(p.price_start_time, u.usage_date)
             AND u.usage_date < COALESCE(p.price_end_time, DATE '9999-12-31')
-        WHERE u.usage_date >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE u.usage_date >= DATEADD(DAY, -180, CURRENT_DATE())
         GROUP BY u.usage_date, u.workspace_id, u.sku_name
     """)
 
@@ -80,7 +80,7 @@ def mv_billing_daily_by_sku():
 
 @dlt.table(
     name="mv_billing_daily_by_user",
-    comment="Billing per-user aggregation with category classification (60-day window)",
+    comment="Billing per-user aggregation with category classification (180-day window)",
 )
 def mv_billing_daily_by_user():
     return spark.sql("""
@@ -107,7 +107,7 @@ def mv_billing_daily_by_user():
             AND u.cloud = p.cloud
             AND u.usage_date >= COALESCE(p.price_start_time, u.usage_date)
             AND u.usage_date < COALESCE(p.price_end_time, DATE '9999-12-31')
-        WHERE u.usage_date >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE u.usage_date >= DATEADD(DAY, -180, CURRENT_DATE())
             AND u.identity_metadata.run_as IS NOT NULL
         GROUP BY 1, 2, 3, 4, 5, 6
     """)
@@ -122,7 +122,7 @@ def mv_billing_daily_by_user():
 
 @dlt.table(
     name="mv_cluster_details",
-    comment="Cluster inventory with computed uptime and status (60-day window)",
+    comment="Cluster inventory with computed uptime and status (180-day window)",
 )
 def mv_cluster_details():
     return spark.sql("""
@@ -150,7 +150,7 @@ def mv_cluster_details():
                 ROW_NUMBER() OVER (PARTITION BY cluster_id, workspace_id ORDER BY create_time DESC) AS rn
             FROM system.compute.clusters
             WHERE delete_time IS NULL
-               OR delete_time >= DATEADD(DAY, -60, CURRENT_DATE())
+               OR delete_time >= DATEADD(DAY, -180, CURRENT_DATE())
         )
         WHERE rn = 1
     """)
@@ -165,7 +165,7 @@ def mv_cluster_details():
 
 @dlt.table(
     name="mv_job_run_timeline",
-    comment="Job run details with computed runtime (60-day window)",
+    comment="Job run details with computed runtime (180-day window)",
 )
 def mv_job_run_timeline():
     return spark.sql("""
@@ -185,7 +185,7 @@ def mv_job_run_timeline():
                 CAST(compute_ids AS STRING) AS compute_ids,
                 ROW_NUMBER() OVER (PARTITION BY job_id, run_id, workspace_id ORDER BY period_end_time DESC) AS rn
             FROM system.lakeflow.job_run_timeline
-            WHERE period_start_time >= DATEADD(DAY, -60, CURRENT_DATE())
+            WHERE period_start_time >= DATEADD(DAY, -180, CURRENT_DATE())
         )
         WHERE rn = 1
     """)
@@ -200,7 +200,7 @@ def mv_job_run_timeline():
 
 @dlt.table(
     name="mv_query_history_daily",
-    comment="Query history aggregated daily per warehouse (60-day window)",
+    comment="Query history aggregated daily per warehouse (180-day window)",
 )
 def mv_query_history_daily():
     return spark.sql("""
@@ -218,7 +218,7 @@ def mv_query_history_daily():
             SUM(read_rows) AS total_read_rows,
             SUM(produced_rows) AS total_produced_rows
         FROM system.query.history
-        WHERE start_time >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE start_time >= DATEADD(DAY, -180, CURRENT_DATE())
         GROUP BY DATE(start_time), workspace_id, compute.warehouse_id
     """)
 
@@ -232,7 +232,7 @@ def mv_query_history_daily():
 
 @dlt.table(
     name="mv_query_history_by_user",
-    comment="Query history aggregated by user (60-day window)",
+    comment="Query history aggregated by user (180-day window)",
 )
 def mv_query_history_by_user():
     return spark.sql("""
@@ -246,7 +246,7 @@ def mv_query_history_by_user():
             SUM(read_rows) AS total_read_rows,
             SUM(produced_rows) AS total_produced_rows
         FROM system.query.history
-        WHERE start_time >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE start_time >= DATEADD(DAY, -180, CURRENT_DATE())
             AND executed_by IS NOT NULL
         GROUP BY DATE(start_time), workspace_id, executed_by
     """)
@@ -261,7 +261,7 @@ def mv_query_history_by_user():
 
 @dlt.table(
     name="mv_query_runtime_distribution",
-    comment="Query runtime distribution buckets (60-day window)",
+    comment="Query runtime distribution buckets (180-day window)",
 )
 def mv_query_runtime_distribution():
     return spark.sql("""
@@ -288,7 +288,7 @@ def mv_query_runtime_distribution():
             END AS bucket_order,
             COUNT(*) AS query_count
         FROM system.query.history
-        WHERE start_time >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE start_time >= DATEADD(DAY, -180, CURRENT_DATE())
         GROUP BY 1, 2, 3, 4
     """)
 
@@ -302,7 +302,7 @@ def mv_query_runtime_distribution():
 
 @dlt.table(
     name="mv_warehouse_concurrency",
-    comment="Query concurrency by hour per warehouse (60-day window)",
+    comment="Query concurrency by hour per warehouse (180-day window)",
 )
 def mv_warehouse_concurrency():
     return spark.sql("""
@@ -313,7 +313,7 @@ def mv_warehouse_concurrency():
             compute.warehouse_id AS warehouse_id,
             COUNT(*) AS concurrent_queries
         FROM system.query.history
-        WHERE start_time >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE start_time >= DATEADD(DAY, -180, CURRENT_DATE())
             AND compute.warehouse_id IS NOT NULL
         GROUP BY DATE(start_time), HOUR(start_time), workspace_id, compute.warehouse_id
     """)
@@ -328,7 +328,7 @@ def mv_warehouse_concurrency():
 
 @dlt.table(
     name="mv_long_running_queries",
-    comment="Queries exceeding 5 minutes with truncated SQL text (60-day window)",
+    comment="Queries exceeding 5 minutes with truncated SQL text (180-day window)",
 )
 def mv_long_running_queries():
     return spark.sql("""
@@ -344,7 +344,7 @@ def mv_long_running_queries():
             execution_status AS status,
             start_time
         FROM system.query.history
-        WHERE start_time >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE start_time >= DATEADD(DAY, -180, CURRENT_DATE())
             AND total_duration_ms > 300000
     """)
 
@@ -358,7 +358,7 @@ def mv_long_running_queries():
 
 @dlt.table(
     name="mv_serving_endpoints",
-    comment="Model serving endpoint activity summary (60-day window)",
+    comment="Model serving endpoint activity summary (180-day window)",
 )
 def mv_serving_endpoints():
     return spark.sql("""
@@ -369,7 +369,7 @@ def mv_serving_endpoints():
             MIN(change_time) AS first_seen,
             MAX(change_time) AS last_seen
         FROM system.serving.served_entities
-        WHERE change_time >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE change_time >= DATEADD(DAY, -180, CURRENT_DATE())
         GROUP BY served_entity_name, entity_type, workspace_id
     """)
 
@@ -383,7 +383,7 @@ def mv_serving_endpoints():
 
 @dlt.table(
     name="mv_experiment_runs",
-    comment="MLflow experiment runs with computed runtime (60-day window)",
+    comment="MLflow experiment runs with computed runtime (180-day window)",
 )
 def mv_experiment_runs():
     return spark.sql("""
@@ -397,5 +397,5 @@ def mv_experiment_runs():
             TIMESTAMPDIFF(SECOND, start_time, COALESCE(end_time, CURRENT_TIMESTAMP())) AS runtime_seconds,
             created_by AS user_id
         FROM system.mlflow.runs_latest
-        WHERE start_time >= DATEADD(DAY, -60, CURRENT_DATE())
+        WHERE start_time >= DATEADD(DAY, -180, CURRENT_DATE())
     """)
