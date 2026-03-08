@@ -1,0 +1,282 @@
+================================================================================
+  Databricks Platform Insights — Complete Deployment Guide
+================================================================================
+
+This guide walks through every step needed to deploy and run the project
+from scratch, including configuration, deployment, and verification.
+
+
+================================================================================
+  Step 1: Prerequisites
+================================================================================
+
+1a. Install Databricks CLI (v0.200+)
+--------------------------------------
+  # macOS
+  brew install databricks/tap/databricks
+
+  # Verify
+  databricks --version
+
+
+1b. Configure a CLI authentication profile
+--------------------------------------------
+  databricks configure --profile e2demofe
+
+  When prompted:
+    - Host: https://e2-demo-field-eng.cloud.databricks.com (your workspace URL)
+    - Authentication: Follow the OAuth or PAT flow
+
+  Verify it works:
+    databricks current-user me -p e2demofe
+
+
+1c. Verify you have access to system tables
+---------------------------------------------
+  In a Databricks SQL editor or notebook, confirm these queries return data:
+
+    SELECT 1 FROM system.billing.usage LIMIT 1;
+    SELECT 1 FROM system.compute.clusters LIMIT 1;
+    SELECT 1 FROM system.query.history LIMIT 1;
+    SELECT 1 FROM system.lakeflow.job_run_timeline LIMIT 1;
+    SELECT 1 FROM system.serving.served_entities LIMIT 1;
+    SELECT 1 FROM system.mlflow.runs_latest LIMIT 1;
+
+
+1d. Verify Unity Catalog permissions
+--------------------------------------
+  You need CREATE TABLE and CREATE MATERIALIZED VIEW on the target
+  catalog/schema:
+
+    CREATE SCHEMA IF NOT EXISTS bircatalog.admin;
+
+
+================================================================================
+  Step 2: Clone the repository
+================================================================================
+
+  git clone https://github.com/birbalin25/ai-ml-agents.git
+  cd ai-ml-agents/Databricks-Platform-Insights
+
+
+================================================================================
+  Step 3: Configure variables.yml
+================================================================================
+
+  Open variables.yml and review the defaults. Most have sensible defaults —
+  only change if your environment differs.
+
+  +---------------------------+-----------------------+--------------------------------------+
+  | Variable                  | Default               | What to set                          |
+  +---------------------------+-----------------------+--------------------------------------+
+  | catalog                   | bircatalog            | Your Unity Catalog name              |
+  | schema                    | admin                 | Schema for MVs and synced tables     |
+  | lakebase_instance         | (none)                | Set per-target in databricks.yml     |
+  | lakebase_capacity         | CU_1                  | Instance size (CU_1/CU_2/CU_4/CU_8) |
+  | lakebase_host             | (none)                | Set per-target in databricks.yml     |
+  | lakebase_port             | 5432                  | Leave as-is                          |
+  | lakebase_database         | databricks_postgres   | Leave as-is                          |
+  | query_cache_ttl_seconds   | 300                   | Cache duration in seconds            |
+  +---------------------------+-----------------------+--------------------------------------+
+
+  If you change catalog or schema, no other files need updating — they are
+  passed via bundle variables everywhere.
+
+  ** One exception **: if you change "schema" from "admin" to something else,
+  also update src/config.py line 25:
+
+    LAKEBASE_SCHEMA = "admin"    <-- change this to match your schema variable
+
+
+================================================================================
+  Step 4: Configure databricks.yml targets
+================================================================================
+
+  Open databricks.yml and update the target(s) you will deploy to.
+
+  For the "prod" target (around line 109), update:
+
+    prod:
+      mode: production
+      run_as:
+        user_name: your-email@company.com          <-- your Databricks username
+      workspace:
+        host: https://your-workspace.cloud.databricks.com   <-- your workspace
+
+      variables:
+        lakebase_instance: "your-lakebase-instance-name"    <-- pick a name
+        lakebase_host: "placeholder"                        <-- set after Step 8
+        query_cache_ttl_seconds: "600"
+
+  For the "dev" target (around line 98), same pattern:
+
+    dev:
+      mode: development
+      default: true
+      workspace:
+        host: https://your-dev-workspace.cloud.databricks.com
+
+      variables:
+        lakebase_instance: "your-dev-lakebase-instance"
+        lakebase_host: "placeholder"
+        query_cache_ttl_seconds: "120"
+
+  ** Note on lakebase_host **:
+  If this is your first deployment and the Lakebase instance doesn't exist yet,
+  set it to "placeholder". The job in Step 7 will create the instance, and
+  you'll get the real host in Step 8.
+
+  If you already have a Lakebase instance, get the host from:
+
+    databricks api get /api/2.0/database/instances/your-instance-name -p e2demofe
+
+  Look for "pg_host" in the response.
+
+
+================================================================================
+  Step 5: Validate the bundle
+================================================================================
+
+  databricks bundle validate -t prod -p e2demofe
+
+  Fix any errors before proceeding. Common issues:
+    - Missing variable values -> fill them in databricks.yml target section
+    - Authentication errors   -> re-run: databricks configure --profile e2demofe
+    - Catalog/schema missing  -> create it (Step 1d)
+
+
+================================================================================
+  Step 6: Deploy the bundle
+================================================================================
+
+  databricks bundle deploy -t prod -p e2demofe
+
+  This creates all three resources in Databricks:
+    - App:          admin-observability-prod (+ auto-creates a service principal)
+    - DLT Pipeline: admin-observability-mvs-prod
+    - Job:          admin-observability-mv-refresh-prod
+
+
+================================================================================
+  Step 7: Run the refresh job
+================================================================================
+
+  databricks bundle run mv_refresh_job -t prod -p e2demofe
+
+  This runs 4 tasks in dependency order:
+
+  +-------+---------------------------+----------------------------------------------+
+  | Order | Task                      | What it does                                 |
+  +-------+---------------------------+----------------------------------------------+
+  | 1a    | refresh_mvs               | Runs DLT pipeline to create all 11 MVs       |
+  | 1b    | setup_lakebase_instance   | Creates Lakebase instance, waits for ACTIVE   |
+  |       |                           | (runs in parallel with 1a)                   |
+  | 2     | sync_to_lakebase          | Creates 11 snapshot-synced tables in Lakebase |
+  |       |                           | (waits for 1a + 1b)                          |
+  | 3     | grant_lakebase_access     | Grants the app's SP read access to Lakebase   |
+  |       |                           | (waits for 2)                                |
+  +-------+---------------------------+----------------------------------------------+
+
+  Wait for the job to complete. Monitor in the Databricks UI (Jobs page) or:
+
+    databricks jobs list --name "admin-observability-mv-refresh-prod" -p e2demofe
+
+
+================================================================================
+  Step 8: Get the Lakebase host (first-time only)
+================================================================================
+
+  If you set lakebase_host to "placeholder" in Step 4, get the real host now:
+
+    databricks api get /api/2.0/database/instances/your-instance-name -p e2demofe
+
+  Find "pg_host" in the JSON response, e.g.:
+    instance-xxxx-xxxx.database.cloud.databricks.com
+
+  Update databricks.yml with the real host:
+
+    variables:
+      lakebase_host: "instance-xxxx-xxxx.database.cloud.databricks.com"
+
+
+================================================================================
+  Step 9: Redeploy with correct Lakebase host (first-time only)
+================================================================================
+
+  databricks bundle deploy -t prod -p e2demofe
+
+  This updates the app's environment variables with the real Lakebase host.
+
+
+================================================================================
+  Step 10: Verify the deployment
+================================================================================
+
+  10a. Check MVs have data
+  -------------------------
+  Run in a Databricks SQL editor:
+
+    SELECT COUNT(*) FROM bircatalog.admin.mv_billing_daily_by_sku;
+    -- Should return rows (e.g. ~900K for 180-day window)
+
+  10b. Check app is running
+  --------------------------
+
+    databricks apps get admin-observability-prod -p e2demofe
+
+  Look for "status": "RUNNING" and note the "url" field.
+
+  10c. Open the app URL in your browser and verify
+  --------------------------------------------------
+    - All 4 tabs render: Platform Overview, Data Engineering,
+      Machine Learning, Data Warehousing
+    - Workspace filter dropdown is populated
+    - KPI cards show real numbers (not N/A or 0)
+    - Charts display data
+    - "Refresh" button clears cache and reloads
+    - Sidebar shows "Data as of: YYYY-MM-DD" (should be recent)
+    - Query latency is sub-second (vs 5-30s on direct system table queries)
+
+
+================================================================================
+  Ongoing: Automatic refresh
+================================================================================
+
+  After initial deployment, no manual steps are needed.
+
+  The job runs every 4 hours (UTC) and automatically:
+    1. Refreshes all 11 MVs with latest system table data
+    2. Ensures Lakebase instance is healthy
+    3. Re-syncs tables (snapshot mode - full refresh)
+    4. Re-grants access (idempotent)
+
+
+================================================================================
+  Quick Reference: Complete first-time commands
+================================================================================
+
+  # 1. Clone
+  git clone https://github.com/birbalin25/ai-ml-agents.git
+  cd ai-ml-agents/Databricks-Platform-Insights
+
+  # 2. Edit variables.yml and databricks.yml targets (see Steps 3-4)
+
+  # 3. Validate
+  databricks bundle validate -t prod -p e2demofe
+
+  # 4. Deploy
+  databricks bundle deploy -t prod -p e2demofe
+
+  # 5. Run the job (creates MVs, Lakebase instance, synced tables, grants)
+  databricks bundle run mv_refresh_job -t prod -p e2demofe
+
+  # 6. Get Lakebase host (first-time only)
+  databricks api get /api/2.0/database/instances/your-instance-name -p e2demofe
+
+  # 7. Update lakebase_host in databricks.yml with the pg_host value
+
+  # 8. Redeploy with correct host
+  databricks bundle deploy -t prod -p e2demofe
+
+  # 9. Verify
+  databricks apps get admin-observability-prod -p e2demofe
