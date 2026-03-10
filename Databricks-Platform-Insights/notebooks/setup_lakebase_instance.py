@@ -42,8 +42,8 @@ resp = requests.get(
 instance_exists = resp.status_code == 200
 if instance_exists:
     state = resp.json().get("state", "UNKNOWN")
-    pg_host = resp.json().get("pg_host", "")
-    print(f"Instance '{LAKEBASE_INSTANCE}' already exists (state={state}, host={pg_host})")
+    read_write_dns = resp.json().get("read_write_dns", "")
+    print(f"Instance '{LAKEBASE_INSTANCE}' already exists (state={state}, host={read_write_dns})")
 else:
     print(f"Instance '{LAKEBASE_INSTANCE}' does not exist. Creating...")
 
@@ -99,13 +99,13 @@ while elapsed < MAX_WAIT_SECONDS:
 
     data = resp.json()
     state = data.get("state", "UNKNOWN")
-    pg_host = data.get("pg_host", "")
+    read_write_dns = data.get("read_write_dns", "")
 
     print(f"  [{elapsed}s] Instance state: {state}")
 
-    if state == "ACTIVE":
-        print(f"\nInstance is ACTIVE!")
-        print(f"  Host: {pg_host}")
+    if state == "AVAILABLE":
+        print(f"\nInstance is AVAILABLE!")
+        print(f"  Host: {read_write_dns}")
         print(f"  Database: {LAKEBASE_DATABASE}")
         break
     elif state in ("FAILED", "DELETED"):
@@ -127,6 +127,6 @@ print("=" * 70)
 print("LAKEBASE INSTANCE SETUP COMPLETE")
 print("=" * 70)
 print(f"  Instance: {LAKEBASE_INSTANCE}")
-print(f"  Host:     {pg_host}")
+print(f"  Host:     {read_write_dns}")
 print(f"  Database: {LAKEBASE_DATABASE}")
-print(f"  State:    ACTIVE")
+print(f"  State:    AVAILABLE")

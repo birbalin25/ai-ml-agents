@@ -6,7 +6,7 @@ variables:
 
   schema:
     description: "Schema name for materialized views and synced tables"
-    default: "admin"
+    default: "admin_insight"
 
   # --- Lakebase Instance ---
   lakebase_instance:

@@ -22,7 +22,7 @@ LAKEBASE_DATABASE = os.environ.get("LAKEBASE_DATABASE", "databricks_postgres")
 # ---------------------------------------------------------------------------
 # Lakebase Schema (where synced MV tables land)
 # ---------------------------------------------------------------------------
-LAKEBASE_SCHEMA = "admin"
+LAKEBASE_SCHEMA = "admin_insight"
 
 # ---------------------------------------------------------------------------
 # App Settings

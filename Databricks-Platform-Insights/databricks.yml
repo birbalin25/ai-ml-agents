@@ -7,7 +7,7 @@ include:
 resources:
   apps:
     admin_observability:
-      name: "admin-observability-${bundle.target}"
+      name: "bir-admin-observability-${bundle.target}"
       description: "Databricks Platform Insights — monitors compute usage, cost drivers, performance, and user behavior across all workspaces."
       source_code_path: ./src
 
@@ -31,7 +31,7 @@ resources:
 
   pipelines:
     mv_pipeline:
-      name: "admin-observability-mvs-${bundle.target}"
+      name: "bir-admin-observability-mvs-${bundle.target}"
       catalog: ${var.catalog}
       target: ${var.schema}
       serverless: true
@@ -42,7 +42,7 @@ resources:
 
   jobs:
     mv_refresh_job:
-      name: "admin-observability-mv-refresh-${bundle.target}"
+      name: "bir-admin-observability-mv-refresh-${bundle.target}"
       schedule:
         quartz_cron_expression: "0 0 */4 * * ?"
         timezone_id: "UTC"
@@ -84,7 +84,7 @@ resources:
           notebook_task:
             notebook_path: ./notebooks/grant_lakebase_access.py
             base_parameters:
-              app_name: "admin-observability-${bundle.target}"
+              app_name: "bir-admin-observability-${bundle.target}"
               lakebase_instance: ${var.lakebase_instance}
               lakebase_database: ${var.lakebase_database}
               schema: ${var.schema}
@@ -111,9 +111,10 @@ targets:
     run_as:
       user_name: birbal.das@databricks.com
     workspace:
-      host: https://e2-demo-field-eng.cloud.databricks.com
+      host: https://adb-984752964297111.11.azuredatabricks.net
+      root_path: "/Workspace/A_admin_insight/${bundle.target}"
 
     variables:
-      lakebase_instance: "bir-lakebase-fraud-detection"
-      lakebase_host: "instance-9278b37e-e9ea-452a-8b18-ba7c58bc919c.database.cloud.databricks.com"
+      lakebase_instance: "bir-lakebase-platform-insight2"
+      lakebase_host: "instance-09568850-8eda-42e6-870e-d8b6eceb87cd.database.azuredatabricks.net"
       query_cache_ttl_seconds: "600"

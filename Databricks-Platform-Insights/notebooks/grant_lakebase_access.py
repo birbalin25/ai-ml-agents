@@ -10,14 +10,18 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install psycopg2-binary
-# MAGIC dbutils.library.restartPython()
+# MAGIC %pip install psycopg2-binary "databricks-sdk>=0.61.0"
+
+# COMMAND ----------
+
+dbutils.library.restartPython()
 
 # COMMAND ----------
 
 from databricks.sdk import WorkspaceClient
 import requests
 import psycopg2
+import uuid
 
 w = WorkspaceClient()
 
@@ -71,7 +75,7 @@ if resp.status_code != 200:
     raise Exception(f"Failed to get Lakebase instance: {resp.status_code} - {resp.text[:500]}")
 
 instance_data = resp.json()
-pg_host = instance_data["pg_host"]
+pg_host = instance_data["read_write_dns"]
 pg_port = instance_data.get("pg_port", 5432)
 state = instance_data.get("state", "UNKNOWN")
 
@@ -79,8 +83,8 @@ print(f"Lakebase Host: {pg_host}")
 print(f"Lakebase Port: {pg_port}")
 print(f"Lakebase State: {state}")
 
-if state != "ACTIVE":
-    raise Exception(f"Lakebase instance is not ACTIVE (state={state})")
+if state != "AVAILABLE":
+    raise Exception(f"Lakebase instance is not AVAILABLE (state={state})")
 
 # COMMAND ----------
 
@@ -89,11 +93,11 @@ if state != "ACTIVE":
 
 # COMMAND ----------
 
-# Generate OAuth token for the current user (notebook runner)
-auth_headers = w.config.authenticate()
-auth_token = auth_headers.get("Authorization", "")
-if auth_token.startswith("Bearer "):
-    auth_token = auth_token[7:]
+# Generate database credential via SDK
+cred = w.database.generate_database_credential(
+    request_id=str(uuid.uuid4()),
+    instance_names=[LAKEBASE_INSTANCE],
+)
 
 # Get current user email for PG connection
 current_user = w.current_user.me()
@@ -106,7 +110,7 @@ conn = psycopg2.connect(
     port=pg_port,
     database=LAKEBASE_DATABASE,
     user=pg_user,
-    password=auth_token,
+    password=cred.token,
     sslmode="require",
 )
 conn.autocommit = True

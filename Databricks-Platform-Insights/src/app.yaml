@@ -5,17 +5,12 @@ command:
 
 env:
   - name: APP_ENVIRONMENT
-    description: "Deployment environment (dev or prod)"
     value: "prod"
   - name: QUERY_CACHE_TTL_SECONDS
-    description: "Cache TTL for SQL query results in seconds"
-    value: "300"
+    value: "600"
   - name: LAKEBASE_HOST
-    description: "Lakebase PostgreSQL host"
-    value: "instance-9278b37e-e9ea-452a-8b18-ba7c58bc919c.database.cloud.databricks.com"
+    value: "instance-09568850-8eda-42e6-870e-d8b6eceb87cd.database.azuredatabricks.net"
   - name: LAKEBASE_PORT
-    description: "Lakebase PostgreSQL port"
     value: "5432"
   - name: LAKEBASE_DATABASE
-    description: "Lakebase database name"
     value: "databricks_postgres"
